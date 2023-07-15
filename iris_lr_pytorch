@@ -1,0 +1,46 @@
+class LogisticRegression(nn.Module):
+  def __init__(self, input_size):
+    super(LogisticRegression, self).__init__()
+    self.linear = nn.Linear(input_size, 3)
+    #self.soft = nn.Softmax()
+
+  def forward(self, x):
+    out = self.linear(x)
+    #out = self.soft(out)
+    return
+
+model = LogisticRegression(X_train.shape[1])
+
+criteria = nn.NLLLoss()
+
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.001)
+
+num_epochs = 10
+
+for epochs in range(num_epochs):
+  for i in range(X_train.shape[0]):
+    output = model(X_train[i])
+    output = output.unsqueeze(0)
+    #print(output)
+    #print(y_train[i])
+    _,predicted = torch.max(output, 1)
+    #print(predicted)
+    predicted = predicted.float()
+    predicted.requires_grad_(True)
+    loss = criteria(predicted, y_train[i])
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+
+#testing
+
+with torch.no_grad():
+
+    correct=0
+
+    for i in range(X_test.shape[0]):
+      output = model(X_test[i])
+      output = output.unsqueeze(0)
+      _, prediction = torch.max(output, dim=1)
+      prediction = prediction.float()
+      correct += prediction==y_test[i]
